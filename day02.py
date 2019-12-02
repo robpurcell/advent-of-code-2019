@@ -1,34 +1,37 @@
-def process(input_content, offset=0):
-    instruction = get_program_line(input_content, offset)
+def process(input_program, offset=0):
+    instruction = get_instruction(input_program, offset)
     opcode = instruction[0]
 
     if opcode == 1:
-        input_content = add(instruction, input_content)
+        input_program = add(instruction, input_program)
     elif opcode == 2:
-        input_content = multiply(instruction, input_content)
+        input_program = multiply(instruction, input_program)
     elif opcode == 99:
-        return input_content
+        return input_program
     else:
         exit(1)
 
-    return process(input_content, offset + 4)
+    return process(input_program, offset + 4)
 
 
-def get_program_line(input_file, offset):
-    if offset + 4 > len(input_file):
-        return [input_file[offset + 0]]
+def get_instruction(input_program, instruction_pointer):
+    if instruction_pointer + 4 > len(input_program):
+        return [input_program[instruction_pointer + 0]]
     else:
-        return input_file[offset + 0], input_file[offset + 1], input_file[offset + 2], input_file[offset + 3]
+        return input_program[instruction_pointer + 0], \
+               input_program[instruction_pointer + 1], \
+               input_program[instruction_pointer + 2], \
+               input_program[instruction_pointer + 3]
 
 
-def add(instruction, input_file):
+def add(instruction, input_program):
     parameter1_address = instruction[1]
     parameter2_address = instruction[2]
-    sum_of_inputs = input_file[parameter1_address] + input_file[parameter2_address]
+    sum_of_inputs = input_program[parameter1_address] + input_program[parameter2_address]
     output_index = instruction[3]
 
-    input_file[output_index] = sum_of_inputs
-    return input_file
+    input_program[output_index] = sum_of_inputs
+    return input_program
 
 
 def multiply(instruction, input_file):
@@ -41,17 +44,27 @@ def multiply(instruction, input_file):
     return input_file
 
 
-def initial_setup(initial_program):
-    initial_program[1] = 12
-    initial_program[2] = 2
+def initial_setup(initial_program, noun, verb):
+    initial_program[1] = noun
+    initial_program[2] = verb
 
 
 if __name__ == '__main__':
     with open("day02-input.txt") as f:
         line = f.readline()
+
         program = [int(x) for x in line.split(",")]
 
-        initial_setup(program)
-        value = process(program)[0]
+        initial_setup(program, 12, 2)
+        output = process(program)[0]
 
-        print(f"Part 1: Value at position 0 = {value}")
+        print(f"Part 1: Value at position 0 = {output}")
+
+        for i in range(100):
+            for j in range(100):
+                program = [int(x) for x in line.split(",")]
+                initial_setup(program, i, j)
+                output = process(program)[0]
+
+                if output == 19690720:
+                    print(f"Part 2: Answer = {(100 * i) + j}")
