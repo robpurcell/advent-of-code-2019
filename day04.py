@@ -6,7 +6,7 @@ def is_in_range(num, start, end):
     return start < num < end
 
 
-def contains_digits(num):
+def contains_double_digits(num):
     num_str = str(num)
     i = 0
 
@@ -17,14 +17,23 @@ def contains_digits(num):
     return False
 
 
+def double_not_part_of_wider_group(num):
+    num_str = str(num)
+
+    for c in num_str:
+        if num_str.count(c) == 2:
+            return True
+    return False
+
+
 def digits_dont_decrease(num):
     num_str = str(num)
-    i = 0
+    count = 0
 
     for c in num_str[:-1]:
-        if int(c) > int(num_str[i + 1]):
+        if int(c) > int(num_str[count + 1]):
             return False
-        i += 1
+        count += 1
     return True
 
 
@@ -34,8 +43,20 @@ if __name__ == '__main__':
     valid_passwords = 0
 
     for x in range(int(i), int(j)):
-        if is_six_digits(x) and is_in_range(x, int(i), int(j)) and contains_digits(x) and digits_dont_decrease(x):
+        if is_six_digits(x) and \
+                is_in_range(x, int(i), int(j)) and \
+                contains_double_digits(x) and \
+                digits_dont_decrease(x):
             valid_passwords += 1
 
-    print(f"Number of valid passwords = {valid_passwords}")
+    print(f"Part1: Number of valid passwords = {valid_passwords}")
 
+    valid_passwords = 0
+    for x in range(int(i), int(j)):
+        if is_six_digits(x) and \
+                is_in_range(x, int(i), int(j)) and \
+                double_not_part_of_wider_group(x) and \
+                digits_dont_decrease(x):
+            valid_passwords += 1
+
+    print(f"Part1: Number of valid passwords = {valid_passwords}")
