@@ -1,22 +1,37 @@
-def process(input_program, offset=0):
-    instruction = get_instruction(input_program, offset)
-    opcode = instruction[0]
+def get_opcode(instruction):
+    return int(str(instruction)[-2:])
+
+
+def process(input_program, offset=0, input_id=0):
+    opcode = get_opcode(input_program[offset])
+    instruction = get_instruction(input_program, offset, opcode)
 
     if opcode == 1:
         input_program = add(instruction, input_program)
+        offset += 4
     elif opcode == 2:
         input_program = multiply(instruction, input_program)
+        offset += 4
+    elif opcode == 3:
+        input_program[instruction[1]] = input_id
+        offset += 2
+    elif opcode == 4:
+        print(f"Output: {input_program[instruction[1]]} at offset: {offset}")
+        offset += 2
     elif opcode == 99:
         return input_program
     else:
         exit(1)
 
-    return process(input_program, offset + 4)
+    return process(input_program, offset, input_id)
 
 
-def get_instruction(input_program, instruction_pointer):
-    if instruction_pointer + 4 > len(input_program):
+def get_instruction(input_program, instruction_pointer, opcode):
+    if opcode == 99:
         return [input_program[instruction_pointer + 0]]
+    elif opcode == 3 or opcode == 4:
+        return input_program[instruction_pointer + 0], \
+               input_program[instruction_pointer + 1]
     else:
         return input_program[instruction_pointer + 0], \
                input_program[instruction_pointer + 1], \
@@ -24,24 +39,48 @@ def get_instruction(input_program, instruction_pointer):
                input_program[instruction_pointer + 3]
 
 
+def get_parameter_modes(instruction):
+    full_instruction = str(instruction).zfill(5)
+    return tuple(int(x) for x in (full_instruction[-3:-2], full_instruction[-4:-3], full_instruction[-5:-4]))
+
+
+def get_input_value(input_program, param, mode):
+    if mode == 0:
+        return input_program[param]
+    else:  # Immediate mode
+        return param
+
+
 def add(instruction, input_program):
-    parameter1_address = instruction[1]
-    parameter2_address = instruction[2]
-    sum_of_inputs = input_program[parameter1_address] + input_program[parameter2_address]
-    output_index = instruction[3]
+    mode1, mode2, mode3 = get_parameter_modes(instruction[0])
+
+    input_1 = get_input_value(input_program, instruction[1], mode1)
+    input_2 = get_input_value(input_program, instruction[2], mode2)
+
+    sum_of_inputs = input_1 + input_2
+    output_index = instruction[3]  # Always in position mode
 
     input_program[output_index] = sum_of_inputs
     return input_program
 
 
-def multiply(instruction, input_file):
-    parameter1_address = instruction[1]
-    parameter2_address = instruction[2]
-    product_of_inputs = input_file[parameter1_address] * input_file[parameter2_address]
-    output_index = instruction[3]
+def multiply(instruction, input_program):
+    mode1, mode2, mode3 = get_parameter_modes(instruction[0])
 
-    input_file[output_index] = product_of_inputs
-    return input_file
+    input_1 = get_input_value(input_program, instruction[1], mode1)
+    input_2 = get_input_value(input_program, instruction[2], mode2)
+
+    sum_of_inputs = input_1 * input_2
+    output_index = instruction[3]  # Always in position mode
+
+    input_program[output_index] = sum_of_inputs
+    return input_program
+
+
+def process_input(instruction, input_program):
+    mode1, mode2, mode3 = get_parameter_modes(instruction[0])
+
+    return get_input_value(input_program, instruction[1], mode1)
 
 
 def initial_setup(initial_program, noun, verb):
