@@ -11,3 +11,11 @@ if __name__ == '__main__':
         print(f"Part 1")
         output = day02.process(program,  input_id=1)[0]
 
+    with open("day05-input.txt") as f:
+        line = f.readline()
+
+        program = [int(x) for x in line.split(",")]
+
+        print(f"Part 2")
+        output = day02.process(program, input_id=5)[0]
+
